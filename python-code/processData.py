@@ -1,3 +1,7 @@
+#euler_order: roll, pitch, yaw
+#original euler_order: yaw pitch roll
+#euler_order in oriTrakHAR: roll yaw pitch
+
 from scipy.interpolate import CubicSpline
 import tf
 import numpy as np
@@ -153,8 +157,8 @@ def Calibrate(quat):
     torsoZRotate = Quaternion([0.707, 0, 0, 0.707])
     offset = quat*torso
     euler = tf.transformations.euler_from_quaternion(offset)
-    euler[0] = 0
-    euler[2] = 0
+    euler[0] = 0  #roll
+    euler[1] = 0  #pitch
     expected = tf.transformations.quaternion_from_euler(euler)
     expected = Quaternion(expected)
     Offset =quat.inverse*expected
