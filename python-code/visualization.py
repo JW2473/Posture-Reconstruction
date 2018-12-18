@@ -15,8 +15,6 @@ ANGLE_MAP_R = json.load(open('rightDict_yzx.json', 'r'))
 fig = plt.figure()
 ax = fig.gca(projection='3d')
 interpolatedData = processData.processRow(['test.csv', 'test2.csv','test3.csv','test4.csv'], [5.5])
-quatHead, quatLeft, quatRight, _, _, _ = next(interpolatedData)
-
 
 def updateRealtimeVis(quat, idStr, ax):
     if idStr == 'head':
@@ -28,34 +26,37 @@ def updateRealtimeVis(quat, idStr, ax):
         ax.plot(x, y, z)
         return quat
 
-    euler = tf.transformations.euler_from_quaternion([quat[0], quat[1], quat[2], quat[3]])
+    euler = transformations.euler_from_quaternion([quat[1], quat[2], quat[3], quat[0]])
+    print(euler)
     if idStr == 'rightArm':
-        ans =  ANGLE_MAP_R[rad2Bucket(euler[0])][rad2Bucket(euler[2])][rad2Bucket(euler[1])]
-        if ans.shoulderX is not None:
-            elbowRelativeEuler = [deg2rad(ans.shoulderX), deg2rad(ans.shoulderZ), deg2rad(ans.shoulderY)]
+        ans =  ANGLE_MAP_R[str(rad2Bucket(euler[0]))][str(rad2Bucket(euler[2]))][str(rad2Bucket(euler[1]))]
+        if ans['shoulderX'] is not None:
+            elbowRelativeEuler = [deg2rad(ans['shoulderX']), deg2rad(ans['shoulderZ']), deg2rad(ans['shoulderY'])]
             elbowRelativeQuat = transformations.quaternion_from_euler(elbowRelativeEuler[0], elbowRelativeEuler[1], elbowRelativeEuler[2])
-            elbowRelativeQuat = Quaternion(elbowRelativeQuat)
-            elbowPos = elbowRelativeQuat.rotate([0, -1, -1])
+            elbowRelativeQuat = Quaternion(elbowRelativeQuat[3], elbowRelativeQuat[0], elbowRelativeQuat[1], elbowRelativeQuat[2])
+            elbowPos = elbowRelativeQuat.rotate([0, 0, -1])
             wristRelativePos = quat.rotate([0, 0, -1])
             ind = np.linspace(0,1,11)
-            x = [elbowPos[0]*i for i in ind] + [elbowPos[0]+wristRelativePos[0]*i for i in ind]
-            y = [elbowPos[1]*i for i in ind] + [elbowPos[1]+wristRelativePos[1]*i for i in ind]
-            z = [elbowPos[2]*i for i in ind] + [elbowPos[2]+wristRelativePos[2]*i for i in ind]
+            x = [0+elbowPos[0]*i for i in ind] + [0+elbowPos[0]+wristRelativePos[0]*i for i in ind]
+            y = [-1+elbowPos[1]*i for i in ind] + [-1+elbowPos[1]+wristRelativePos[1]*i for i in ind]
+            z = [0+elbowPos[2]*i for i in ind] + [0+elbowPos[2]+wristRelativePos[2]*i for i in ind]
             ax.plot(x, y, z)
             return elbowRelativeQuat
         
     if idStr == 'leftArm':
-        ans =  ANGLE_MAP_L[rad2Bucket(euler[0])][rad2Bucket(euler[2])][rad2Bucket(euler[1])]
-        if ans.shoulderX is not None:
-            elbowRelativeEuler = [deg2rad(ans.shoulderX), deg2rad(ans.shoulderZ), deg2rad(ans.shoulderY)]
+        #print(euler)
+        ans =  ANGLE_MAP_L[str(rad2Bucket(euler[0]))][str(rad2Bucket(euler[2]))][str(rad2Bucket(euler[1]))]
+        #print(ans)
+        if ans['shoulderX'] is not None:
+            elbowRelativeEuler = [deg2rad(ans['shoulderX']), deg2rad(ans['shoulderZ']), deg2rad(ans['shoulderY'])]
             elbowRelativeQuat = transformations.quaternion_from_euler(elbowRelativeEuler[0], elbowRelativeEuler[1], elbowRelativeEuler[2])
-            elbowRelativeQuat = Quaternion(elbowRelativeQuat)
-            elbowPos = elbowRelativeQuat.rotate([0, 1, -1])
-            wristPos = elbowPos + quat.rotate([0, 0, -1])
+            elbowRelativeQuat = Quaternion(elbowRelativeQuat[3], elbowRelativeQuat[0], elbowRelativeQuat[1], elbowRelativeQuat[2])
+            elbowPos = elbowRelativeQuat.rotate([0, 0, -1])
+            wristRelativePos = quat.rotate([0, 0, -1])
             ind = np.linspace(0,1,11)
-            x = [elbowPos[0]*i for i in ind] + [elbowPos[0]+wristRelativePos[0]*i for i in ind]
-            y = [elbowPos[1]*i for i in ind] + [elbowPos[1]+wristRelativePos[1]*i for i in ind]
-            z = [elbowPos[2]*i for i in ind] + [elbowPos[2]+wristRelativePos[2]*i for i in ind]
+            x = [0+elbowPos[0]*i for i in ind] + [0+elbowPos[0]+wristRelativePos[0]*i for i in ind]
+            y = [1+elbowPos[1]*i for i in ind] + [1+elbowPos[1]+wristRelativePos[1]*i for i in ind]
+            z = [0+elbowPos[2]*i for i in ind] + [0+elbowPos[2]+wristRelativePos[2]*i for i in ind]
             ax.plot(x, y, z)
             return elbowRelativeQuat
 
@@ -67,5 +68,22 @@ def rad2Bucket(rad):
     else:
         return ans
 
+def deg2rad(deg): 
+  return deg * 3.1415926 / 180
+
+quatHead, quatLeft, quatRight, _, _, _ = next(interpolatedData)
+#print(quatLeft[0], quatLeft[1], quatLeft[2], quatLeft[3])
+ind = np.linspace(0, 1, 11)
+x = [0 for i in ind]
+y = [-1+2*i for i in ind]
+z = [0 for i in ind]
+ax.plot(x, y, z)
+x = [0 for i in ind]
+y = [0 for i in ind]
+z = [-2+2*i for i in ind]
+ax.plot(x, y, z)
 updateRealtimeVis(quatHead, 'head', ax)
+updateRealtimeVis(quatHead, 'leftArm', ax)
+updateRealtimeVis(quatHead, 'rightArm', ax)
+plt.axis('equal')
 plt.show()

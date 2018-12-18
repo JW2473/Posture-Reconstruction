@@ -9,6 +9,9 @@ import collections
 from pyquaternion import Quaternion
 threshold = 1
 
+def display(quat):
+    print(quat[0], quat[1], quat[2], quat[3])
+
 def processRow(data_dirs, t):
     torsoInterpo = createInterpolator(data_dirs[0])
     headInterpo = createInterpolator(data_dirs[1])
@@ -29,11 +32,13 @@ def processRow(data_dirs, t):
     #headOffset = Quaternion([-0.101687, 0.62569, 0.77248, 0.038392])
     torsoOffset = Quaternion([1, 0, 0, 0])
     headOffset = Quaternion([1, 0, 0, 0])
-    for i in range(0, len(t)):
+    for i in t:
         torsoQuat = next(torsoQuats)
+        #print(torsoQuat[0], torsoQuat[1], torsoQuat[2], torsoQuat[3])
         torsoQuatValid = torsoQuat[0] is not None and not (torsoQuat[0] == torsoQuat[1] and torsoQuat[0] == torsoQuat[2] and torsoQuat[0] == torsoQuat[3])
         if torsoQuatValid:
             correctedTorsoQuat = torsoQuat*torsoOffset
+            #display(correctedTorsoQuat)
             torsoAcc = []
             torsoAcc.append(next(torsoAccs[0]))
             torsoAcc.append(next(torsoAccs[1]))
@@ -41,6 +46,7 @@ def processRow(data_dirs, t):
             torsoAccMag = np.linalg.norm(torsoAcc)
             if torsoAccMag < threshold:
                 torsoOffset = Calibrate(torsoQuat)
+                #print(torsoOffset)
         
         headQuat = next(headQuats)
         headQuatValid = headQuat[0] is not None and not (headQuat[0] == headQuat[1] and headQuat[0] == headQuat[2] and headQuat[0] == headQuat[3])
@@ -57,7 +63,7 @@ def processRow(data_dirs, t):
                 headAccRelative = [headAcc[i] - torsoAcc[i] for i in range(0, 3)]
                 if headAccMag < threshold:
                     headOffset = Calibrate(headQuat)
-        
+                    #print(headOffset)
         leftQuat = next(leftQuats)
         leftQuatValid = leftQuat[0] is not None and not (leftQuat[0] == leftQuat[1] and leftQuat[0] == leftQuat[2] and leftQuat[0] == leftQuat[3])
         if leftQuatValid:
@@ -68,6 +74,7 @@ def processRow(data_dirs, t):
             if torsoQuatValid:
                 leftRelativeQuat = correctedTorsoQuat.inverse*leftQuat
                 #leftRelative = transformations.euler_from_quaternion(leftRelativeQuat)
+                #display(leftQuat)
                 leftAccRelative = [leftAcc[i] - torsoAcc[i] for i in range(0, 3)]
 
         rightQuat = next(rightQuats)
@@ -130,8 +137,8 @@ class InterpoQuat:
                 t1, data1 = next(self.data_time)
             q0 = transformations.quaternion_from_euler(data0[0], data0[1], data0[2]) 
             q1 = transformations.quaternion_from_euler(data1[0], data1[1], data1[2])
-            q0 = Quaternion(q0)
-            q1 = Quaternion(q1)
+            q0 = Quaternion(q0[3], q0[0], q0[1], q0[2])
+            q1 = Quaternion(q1[3], q1[0], q1[1], q1[2])
 
             w = (t[i] - t0)/(t1 - t0)
             yield Quaternion.slerp(q0, q1, w)
@@ -158,12 +165,14 @@ class InterpoCubic:
             yield poly(t)
 
 def Calibrate(quat):
-    torsoZRotate = Quaternion([0.707, 0, 0, 0.707])
+    #torsoZRotate = Quaternion([0.707, 0, 0, 0.707])
+    torsoZRotate = Quaternion([1, 0, 0, 0])
     offset = quat*torsoZRotate
-    euler = list(transformations.euler_from_quaternion([offset[0], offset[1], offset[2], offset[3]]))
+    euler = list(transformations.euler_from_quaternion([offset[1], offset[2], offset[3], offset[0]]))
     euler[0] = 0  #roll
     euler[1] = 0  #pitch
     expected = transformations.quaternion_from_euler(euler[0], euler[1], euler[2])
-    expected = Quaternion(expected)
-    Offset =quat.inverse*expected
+    expected = Quaternion(expected[3], expected[0], expected[1], expected[2])
+    Offset = quat.inverse*expected
+    return Offset
 
