@@ -63,5 +63,11 @@ while True:
         ind = IPs.index(addr[0])
     except ValueError:
         continue
-    Files[ind].write(data + ',' + datetime.now().strftime("%H:%M:%S.%f") + '\n')
+    data = data.split(',')
+    data[0] = str(int(data[0])*3.1415926/180)
+    data[1] = str(int(data[1])*3.1415926/180)
+    data[2] = str(int(data[2])*3.1415926/180)
+    timelist = datetime.now().strftime("%H:%M:%S.%f").split(':')
+    t = str(int(timelist[0])*3600 + int(timelist[1])*60 + float(timelist[2]))
+    Files[ind].write(data + ',' + t + '\n')
     Files[ind].flush()

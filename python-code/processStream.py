@@ -96,28 +96,39 @@ def processRow(data_dirs, t):
 
 
 
-def readData(ind, data_dir):
-    f = open(data_dir, 'r')
-    line = f.readline()
-    while len(line) > 0:
-        linelist = line.split(',')
-        result = []
-        for i in ind:
-            result.append(float(linelist[i]))
-        line = f.readline()
-        yield float(linelist[9]), result
-
+def readData(inds, queues, data_dir):
+    f = os.open(data_dir, os.O_NONBLOCK)
+    while True:
+        try:
+            line = os.read(f, 4096).decode()
+            if len(line) > 0:
+                line = line.split('\n')[-2]
+                linelist = line.split(',')
+                t = float(linelist[9])
+                for i, ind in enumerate(inds):
+                    result = []
+                    for j in ind:
+                        result.append(float(linelist[j]))
+                    queues[i].put((t, result))
+            else:
+                time.sleep(0.05)
+        except OSError as err:
+            if err.errno == 11:
+                continue
+            else:
+                raise err
+        
 
 
 def createInterpolator(data_dir):
-    acc_x_data = readData([3], data_dir)
-    acc_y_data = readData([4], data_dir)
-    acc_z_data = readData([5], data_dir)
-    euler_data = readData([0, 1, 2], data_dir)
-    acc_x_inter = InterpoCubic(acc_x_data)
-    acc_y_inter = InterpoCubic(acc_y_data)
-    acc_z_inter = InterpoCubic(acc_z_data)
-    quat_inter = InterpoQuat(euler_data)
+    queues = [queue.Queue() for i in [0, 1, 2, 3]]
+    th = threading.Thread(target=readData, args=([[3], [4], [5], [0, 1, 2]], queues, data_dir))
+    th.daemon = True
+    th.start()
+    acc_x_inter = InterpoCubic(queues[0])
+    acc_y_inter = InterpoCubic(queues[1])
+    acc_z_inter = InterpoCubic(queues[2])
+    quat_inter = InterpoQuat(queues[3])
 
     return (acc_x_inter, acc_y_inter, acc_z_inter, quat_inter)
 
@@ -127,14 +138,14 @@ class InterpoQuat:
         self.data_time = data_time
 
     def evaluate(self, t):
-        t0, data0 = next(self.data_time)
-        t1, data1 = next(self.data_time)
+        t0, data0 = self.data_time.get(block=True)
+        t1, data1 = self.data_time.get(block=True)
         q = []
         for i in range(0, len(t)):
             while t[i] > t1:
                 t0 = t1
                 data0 = data1
-                t1, data1 = next(self.data_time)
+                t1, data1 = self.data_time.get(block=True)
             q0 = transformations.quaternion_from_euler(data0[0], data0[1], data0[2]) 
             q1 = transformations.quaternion_from_euler(data1[0], data1[1], data1[2])
             q0 = Quaternion(q0[3], q0[0], q0[1], q0[2])
@@ -151,12 +162,12 @@ class InterpoCubic:
         qtime = collections.deque([])
         qdata = collections.deque([])
         for i in range(0, 11):
-            time, data = next(self.data_time)
+            time, data = self.data_time.get(block=True)
             qtime.append(time)
             qdata.append(data)
         for i in range(0, len(t)):
             while t[i] > qtime[5]:
-                time, data = next(self.data_time)
+                time, data = self.data_time.get(block=True)
                 qtime.append(time)
                 qdata.append(data)
                 qtime.popleft()

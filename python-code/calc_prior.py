@@ -31,6 +31,7 @@ for i in t:
     elbowEuler = transformations.euler_from_quaternion([elbowRelativeQuat[1], elbowRelativeQuat[2], elbowRelativeQuat[3], elbowRelativeQuat[0]])
     prior[str(rad2Bucket(wristEuler[0]))+' '+str(rad2Bucket(wristEuler[1]))+' '+str(rad2Bucket(wristEuler[2]))][str(rad2Bucket(elbowEuler[0]))+' '+str(rad2Bucket(elbowEuler[1]))+' '+str(rad2Bucket(elbowEuler[2]))] += 1
 
+json.dump(prior, f)
 f.close()
 
 def rad2Bucket(rad):

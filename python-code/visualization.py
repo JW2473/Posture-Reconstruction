@@ -3,18 +3,22 @@
 #euler_order in oriTrakHAR: roll yaw pitch
 import numpy as np
 import math
+import time
 from pyquaternion import Quaternion
 import transformations
 import json
 import matplotlib.pyplot as plt
-import processData
+from processStream import processRow
 from mpl_toolkits.mplot3d import Axes3D
 
 ANGLE_MAP_L = json.load(open('leftDict_yzx.json', 'r'))
 ANGLE_MAP_R = json.load(open('rightDict_yzx.json', 'r'))
+plt.ion()
 fig = plt.figure()
 ax = fig.gca(projection='3d')
-interpolatedData = processData.processRow(['test.csv', 'test2.csv','test3.csv','test4.csv'], [5.5])
+t = np.linspace(0, 60, 120)
+#interpolatedData = processRow(['test.csv', 'test2.csv', 'test3.csv', 'test4.csv'], t)
+interpolatedData = processRow(['pipe1', 'pipe2','pipe3','pipe4'], t)
 
 def updateRealtimeVis(quat, idStr, ax):
     if idStr == 'head':
@@ -71,19 +75,23 @@ def rad2Bucket(rad):
 def deg2rad(deg): 
   return deg * 3.1415926 / 180
 
-quatHead, quatLeft, quatRight, _, _, _ = next(interpolatedData)
-#print(quatLeft[0], quatLeft[1], quatLeft[2], quatLeft[3])
-ind = np.linspace(0, 1, 11)
-x = [0 for i in ind]
-y = [-1+2*i for i in ind]
-z = [0 for i in ind]
-ax.plot(x, y, z)
-x = [0 for i in ind]
-y = [0 for i in ind]
-z = [-2+2*i for i in ind]
-ax.plot(x, y, z)
-updateRealtimeVis(quatHead, 'head', ax)
-updateRealtimeVis(quatHead, 'leftArm', ax)
-updateRealtimeVis(quatHead, 'rightArm', ax)
-plt.axis('equal')
-plt.show()
+for i in t:
+    quatHead, quatLeft, quatRight, _, _, _ = next(interpolatedData)
+    #print(quatLeft[0], quatLeft[1], quatLeft[2], quatLeft[3])
+    ax.clear()
+    ind = np.linspace(0, 1, 11)
+    x = [0 for i in ind]
+    y = [-1+2*i for i in ind]
+    z = [0 for i in ind]
+    ax.plot(x, y, z)
+    x = [0 for i in ind]
+    y = [0 for i in ind]
+    z = [-2+2*i for i in ind]
+    ax.plot(x, y, z)
+    updateRealtimeVis(quatHead, 'head', ax)
+    updateRealtimeVis(quatLeft, 'leftArm', ax)
+    updateRealtimeVis(quatRight, 'rightArm', ax)
+    plt.axis('equal')
+    plt.show()
+    plt.pause(0.001)
+
