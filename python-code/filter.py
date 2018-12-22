@@ -1,4 +1,25 @@
 import numpy as np
+from processStream import processRow
+
+dt = 0.05
+sigma = 0.1
+t = np.linspace(0, 100, 100/dt)
+
+interpolatedData = processRow(['pipe1', 'pipe2','pipe3','pipe4'], t)
+_, leftQuat2, rightQuat2, _, _, _ = next(interpolatedData)
+leftPoswe2 = leftQuat2.rotate([0, 0, -1])
+rightPoswe2 = rightQuat2.rotate([0, 0, -1])
+_, leftQuat1, rightQuat1, _, _, _ = next(interpolatedData)
+leftPoswe1 = leftQuat1.rotate([0, 0, -1])
+rightPoswe1 = rightQuat1.rotate([0, 0, -1])
+
+_, leftQuat, rightQuat, _, leftAcc, rightAcc = next(interpolatedData)
+leftPoswe = leftQuat.rotate([0, 0, -1])
+rightPoswe = rightQuat.rotate([0, 0, -1])
+leftAccwe = (leftPoswe + leftPoswe2 - 2*leftPoswe1)/dt**2
+rightAccwe = (rightPoswe + rightPoswe2 - 2*rightPoswe1)/dt**2
+leftAccElbow = leftQuat.rotate(leftAcc) - leftAccwe
+rightAccElbow = rightQuat.rotate(rightAcc) - rightAccwe
 
 def gaussian1D(sigma):
     x = np.linspace(-0.5, 0.51, 11)
@@ -18,9 +39,7 @@ def gaussian3D(u, sigma):
     return density
 
 def next(p1, p2, prior, acc):
-    t = 0.02
-    sigma = 0.5
-    density = 2*p1 - p2 + t^2*acc
+    density = 2*p1 - p2 + t**2*acc
     kernel = gaussian1D(sigma)
     np.apply_along_axis(lambda m: np.convolve(m, kernel, mode='full'), axis=0, arr=density)
     np.apply_along_axis(lambda m: np.convolve(m, kernel, mode='full'), axis=1, arr=density)
