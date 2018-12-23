@@ -1,0 +1,23 @@
+1. create a new directory
+
+2. git init:
+Create a new .git file in current directory.
+
+3. git remote add origin <URL>:
+Set origin URL.
+ 
+4. git pull origin:
+Merge local git with remote.
+If any conflict happens, use "git checkout --ours <filename>" or "git checkout --theirs <filename>" to keep either of them.
+
+5. git add <filename>:
+Add a file to be commited.
+
+6. git status:
+Check modified files.
+
+7. git commit:
+Create a new commit.
+
+8. git push origin:
+Copy local git to remote.
