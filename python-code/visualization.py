@@ -1,6 +1,6 @@
 #euler_order: roll, pitch, yaw
 #original euler_order: yaw pitch roll
-#euler_order in oriTrakHAR: roll yaw pitch
+#euler_order in oriTrakHAR: roll yaw pitch 
 import numpy as np
 import math
 import time
@@ -8,7 +8,6 @@ from pyquaternion import Quaternion
 import transformations
 import json
 import matplotlib.pyplot as plt
-from processStream import processRow
 from mpl_toolkits.mplot3d import Axes3D
 
 ANGLE_MAP_L = json.load(open('leftDict_yzx.json', 'r'))
@@ -17,8 +16,13 @@ plt.ion()
 fig = plt.figure()
 ax = fig.gca(projection='3d')
 t = np.linspace(0, 60, 120)
-#interpolatedData = processRow(['test.csv', 'test2.csv', 'test3.csv', 'test4.csv'], t)
-interpolatedData = processRow(['pipe1', 'pipe2','pipe3','pipe4'], t)
+
+
+from processData import processRow
+interpolatedData = processRow(['test.csv', 'test2.csv', 'test3.csv', 'test4.csv'], t)
+
+#from processStream import processRow
+#interpolatedData = processRow(['pipe1', 'pipe2','pipe3','pipe4'], t)
 
 def updateRealtimeVis(quat, idStr, ax):
     if idStr == 'head':
@@ -33,7 +37,7 @@ def updateRealtimeVis(quat, idStr, ax):
     euler = transformations.euler_from_quaternion([quat[1], quat[2], quat[3], quat[0]])
     print(euler)
     if idStr == 'rightArm':
-        ans =  ANGLE_MAP_R[str(rad2Bucket(euler[0]))][str(rad2Bucket(euler[2]))][str(rad2Bucket(euler[1]))]
+        ans =  ANGLE_MAP_R[str(rad2Bucket(euler[2]))][str(rad2Bucket(euler[1]))][str(rad2Bucket(euler[0]))]
         if ans['shoulderX'] is not None:
             elbowRelativeEuler = [deg2rad(ans['shoulderX']), deg2rad(ans['shoulderZ']), deg2rad(ans['shoulderY'])]
             elbowRelativeQuat = transformations.quaternion_from_euler(elbowRelativeEuler[0], elbowRelativeEuler[1], elbowRelativeEuler[2])
@@ -93,5 +97,5 @@ for i in t:
     updateRealtimeVis(quatRight, 'rightArm', ax)
     plt.axis('equal')
     plt.show()
-    plt.pause(0.001)
+    plt.pause(2)
 

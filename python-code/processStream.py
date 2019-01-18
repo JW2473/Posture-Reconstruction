@@ -104,7 +104,7 @@ def readData(inds, queues, data_dir):
             if len(line) > 0:
                 line = line.split('\n')[-2]
                 linelist = line.split(',')
-                t = float(linelist[9])
+                t = float(linelist[0])
                 for i, ind in enumerate(inds):
                     result = []
                     for j in ind:
@@ -122,7 +122,7 @@ def readData(inds, queues, data_dir):
 
 def createInterpolator(data_dir):
     queues = [queue.Queue() for i in [0, 1, 2, 3]]
-    th = threading.Thread(target=readData, args=([[3], [4], [5], [0, 1, 2]], queues, data_dir))
+    th = threading.Thread(target=readData, args=([[3], [4], [5], [12, 13, 14]], queues, data_dir))
     th.daemon = True
     th.start()
     acc_x_inter = InterpoCubic(queues[0])
@@ -146,6 +146,8 @@ class InterpoQuat:
                 t0 = t1
                 data0 = data1
                 t1, data1 = self.data_time.get(block=True)
+
+            #Here I assumed roll pitch yaw, but data may come in a different order
             q0 = transformations.quaternion_from_euler(data0[0], data0[1], data0[2]) 
             q1 = transformations.quaternion_from_euler(data1[0], data1[1], data1[2])
             q0 = Quaternion(q0[3], q0[0], q0[1], q0[2])

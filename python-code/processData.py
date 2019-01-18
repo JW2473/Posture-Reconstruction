@@ -105,7 +105,7 @@ def readData(ind, data_dir):
         for i in ind:
             result.append(float(linelist[i]))
         line = f.readline()
-        yield float(linelist[9]), result
+        yield float(linelist[0]), result
 
 
 
@@ -113,7 +113,7 @@ def createInterpolator(data_dir):
     acc_x_data = readData([3], data_dir)
     acc_y_data = readData([4], data_dir)
     acc_z_data = readData([5], data_dir)
-    euler_data = readData([0, 1, 2], data_dir)
+    euler_data = readData([12, 13, 14], data_dir)
     acc_x_inter = InterpoCubic(acc_x_data)
     acc_y_inter = InterpoCubic(acc_y_data)
     acc_z_inter = InterpoCubic(acc_z_data)
@@ -135,6 +135,8 @@ class InterpoQuat:
                 t0 = t1
                 data0 = data1
                 t1, data1 = next(self.data_time)
+            
+            #Here I assumed roll pitch yaw, but data may come in a different order
             q0 = transformations.quaternion_from_euler(data0[0], data0[1], data0[2]) 
             q1 = transformations.quaternion_from_euler(data1[0], data1[1], data1[2])
             q0 = Quaternion(q0[3], q0[0], q0[1], q0[2])

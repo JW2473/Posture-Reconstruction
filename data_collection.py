@@ -41,32 +41,29 @@ Ports = [None for i in range(0, len(IPs))]
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind(("192.168.4.1", 8080))
 print(IPs)
-n = 0
+
+channels = []
 while n < len(IPs):
     data, addr = sock.recvfrom(1024);
-    if "READY" in data:
-        print(data)
-        if addr[1] not in Ports and addr[0] in IPs:
+    if addr[0] in IPs:
+        channel = data.split(',')[1]
+        if channel not in channels:
             ind = IPs.index(addr[0])
-            Ports[ind] = addr[1]
-            Files[ind] = open(str(addr[1]) + ".csv", 'w')
-            n += 1
-            print(n)
+            Files[ind] = open(channel + ".csv", 'w')
+            #subprocess.Popen("mkfifo pipe" + channel, shell=True)
+            #Files[ind] = open("pipe" + channel, 'w')
+            
 
-for t in zip(IPs, Ports):
-    sock.sendto("START", (t[0], t[1]))
-
+print(len(channels))
 while True:
     data, addr = sock.recvfrom(1024);
     print(data)
     try:
-        ind = IPs.index(addr[0])
+        channel = data.split(',')[1]
     except ValueError:
         continue
-    data = data.split(',')
-    data[0] = str(int(data[0])*3.1415926/180)
-    data[1] = str(int(data[1])*3.1415926/180)
-    data[2] = str(int(data[2])*3.1415926/180)
+    #data = data.split(',')
+    #data[0] = str(int(data[0])*3.1415926/180)
     timelist = datetime.now().strftime("%H:%M:%S.%f").split(':')
     t = str(int(timelist[0])*3600 + int(timelist[1])*60 + float(timelist[2]))
     Files[ind].write(data + ',' + t + '\n')
