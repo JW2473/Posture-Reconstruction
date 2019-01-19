@@ -13,7 +13,7 @@ sock2.bind(("192.168.4.4", 8080))
 '''
 IPs = []
 files = []
-pipe = subprocess.Popen("arp -a|grep ESP", shell=True, stdout=subprocess.PIPE)
+pipe = subprocess.Popen("arp -a|grep esp", shell=True, stdout=subprocess.PIPE)
 text = pipe.stdout.read().decode("utf-8")
 
 
@@ -43,13 +43,16 @@ sock.bind(("192.168.4.1", 8080))
 print(IPs)
 
 channels = []
-while n < len(IPs):
+while len(channels) < len(IPs):
     data, addr = sock.recvfrom(1024);
+    print(data)
     if addr[0] in IPs:
-        channel = data.split(',')[1]
+        channel = data.split(',')[0]
         if channel not in channels:
-            ind = IPs.index(addr[0])
-            Files[ind] = open(channel + ".csv", 'w')
+            channels.append(channel)
+            ind = IPs.index(addr[0]) 
+            Files[ind] = open(channel+'.csv', 'w')
+            #Files[ind] = open('pipe'+channel, 'w')
             #subprocess.Popen("mkfifo pipe" + channel, shell=True)
             #Files[ind] = open("pipe" + channel, 'w')
             
@@ -65,6 +68,6 @@ while True:
     #data = data.split(',')
     #data[0] = str(int(data[0])*3.1415926/180)
     timelist = datetime.now().strftime("%H:%M:%S.%f").split(':')
-    t = str(int(timelist[0])*3600 + int(timelist[1])*60 + float(timelist[2]))
+    t = str((int(timelist[0])*3600 + int(timelist[1])*60 + float(timelist[2]))/1000)
     Files[ind].write(data + ',' + t + '\n')
     Files[ind].flush()

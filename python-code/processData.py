@@ -110,10 +110,10 @@ def readData(ind, data_dir):
 
 
 def createInterpolator(data_dir):
-    acc_x_data = readData([3], data_dir)
-    acc_y_data = readData([4], data_dir)
-    acc_z_data = readData([5], data_dir)
-    euler_data = readData([12, 13, 14], data_dir)
+    acc_x_data = readData([2], data_dir)
+    acc_y_data = readData([3], data_dir)
+    acc_z_data = readData([4], data_dir)
+    euler_data = readData([11, 12, 13], data_dir)
     acc_x_inter = InterpoCubic(acc_x_data)
     acc_y_inter = InterpoCubic(acc_y_data)
     acc_z_inter = InterpoCubic(acc_z_data)

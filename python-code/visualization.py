@@ -15,14 +15,14 @@ ANGLE_MAP_R = json.load(open('rightDict_yzx.json', 'r'))
 plt.ion()
 fig = plt.figure()
 ax = fig.gca(projection='3d')
-t = np.linspace(0, 60, 120)
+t = np.linspace(0, 60, 240)
 
 
-from processData import processRow
-interpolatedData = processRow(['test.csv', 'test2.csv', 'test3.csv', 'test4.csv'], t)
+#from processData import processRow
+#interpolatedData = processRow(['test.csv', 'test2.csv', 'test3.csv', 'test4.csv'], t)
 
-#from processStream import processRow
-#interpolatedData = processRow(['pipe1', 'pipe2','pipe3','pipe4'], t)
+from processStream import processRow
+interpolatedData = processRow(['../pipe1', '../pipe1','../pipe1','../pipe1'], t)
 
 def updateRealtimeVis(quat, idStr, ax):
     if idStr == 'head':
@@ -80,7 +80,7 @@ def deg2rad(deg):
   return deg * 3.1415926 / 180
 
 for i in t:
-    quatHead, quatLeft, quatRight, _, _, _ = next(interpolatedData)
+    _, quatLeft, _, _, _, _ = next(interpolatedData)
     #print(quatLeft[0], quatLeft[1], quatLeft[2], quatLeft[3])
     ax.clear()
     ind = np.linspace(0, 1, 11)
@@ -92,9 +92,9 @@ for i in t:
     y = [0 for i in ind]
     z = [-2+2*i for i in ind]
     ax.plot(x, y, z)
-    updateRealtimeVis(quatHead, 'head', ax)
+    #updateRealtimeVis(quatHead, 'head', ax)
     updateRealtimeVis(quatLeft, 'leftArm', ax)
-    updateRealtimeVis(quatRight, 'rightArm', ax)
+    #updateRealtimeVis(quatRight, 'rightArm', ax)
     plt.axis('equal')
     plt.show()
     plt.pause(2)

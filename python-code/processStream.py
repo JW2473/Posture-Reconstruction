@@ -48,10 +48,10 @@ def processRow(data_dirs, t):
             torsoAcc.append(next(torsoAccs[1]))
             torsoAcc.append(next(torsoAccs[2]))
             torsoAccMag = np.linalg.norm(torsoAcc)
-            if torsoAccMag < threshold:
+            if i <= 5:
                 torsoOffset = Calibrate(torsoQuat)
                 #print(torsoOffset)
-        
+        '''
         headQuat = next(headQuats)
         headQuatValid = headQuat[0] is not None and not (headQuat[0] == headQuat[1] and headQuat[0] == headQuat[2] and headQuat[0] == headQuat[3])
         if headQuatValid:
@@ -68,6 +68,7 @@ def processRow(data_dirs, t):
                 if headAccMag < threshold:
                     headOffset = Calibrate(headQuat)
                     #print(headOffset)
+        '''
         leftQuat = next(leftQuats)
         leftQuatValid = leftQuat[0] is not None and not (leftQuat[0] == leftQuat[1] and leftQuat[0] == leftQuat[2] and leftQuat[0] == leftQuat[3])
         if leftQuatValid:
@@ -80,7 +81,10 @@ def processRow(data_dirs, t):
                 #leftRelative = transformations.euler_from_quaternion(leftRelativeQuat)
                 #display(leftQuat)
                 leftAccRelative = [leftAcc[i] - torsoAcc[i] for i in range(0, 3)]
-
+                if i < 5:
+                    leftOffset = Calibrate(leftAccRelative)
+                leftAccRelative = leftAccRelative*leftOffset
+        '''
         rightQuat = next(rightQuats)
         rightQuatValid = rightQuat[0] is not None and not (rightQuat[0] == rightQuat[1] and rightQuat[0] == rightQuat[2] and rightQuat[0] == rightQuat[3])
         if rightQuatValid:
@@ -92,7 +96,8 @@ def processRow(data_dirs, t):
                 rightRelativeQuat = correctedTorsoQuat.inverse*rightQuat
                 #rightRelative = transformations.euler_from_quaternion(rightRelativeQuat)
                 rightAccRelative = [rightAcc[i] - torsoAcc[i] for i in range(0, 3)]
-        yield (headRelativeQuat, leftRelativeQuat, rightRelativeQuat, headAccRelative, leftAccRelative, rightAccRelative)
+        '''
+        yield (0, leftRelativeQuat, 0, 0, leftAccRelative, 0)
 
 
 
@@ -104,7 +109,7 @@ def readData(inds, queues, data_dir):
             if len(line) > 0:
                 line = line.split('\n')[-2]
                 linelist = line.split(',')
-                t = float(linelist[0])
+                t = float(linelist[-1])
                 for i, ind in enumerate(inds):
                     result = []
                     for j in ind:
@@ -122,7 +127,7 @@ def readData(inds, queues, data_dir):
 
 def createInterpolator(data_dir):
     queues = [queue.Queue() for i in [0, 1, 2, 3]]
-    th = threading.Thread(target=readData, args=([[3], [4], [5], [12, 13, 14]], queues, data_dir))
+    th = threading.Thread(target=readData, args=([[5], [6], [7], [2, 3, 4]], queues, data_dir))
     th.daemon = True
     th.start()
     acc_x_inter = InterpoCubic(queues[0])
@@ -184,6 +189,7 @@ def Calibrate(quat):
     euler = list(transformations.euler_from_quaternion([offset[1], offset[2], offset[3], offset[0]]))
     euler[0] = 0  #roll
     euler[1] = 0  #pitch
+    euler[2] = 0
     expected = transformations.quaternion_from_euler(euler[0], euler[1], euler[2])
     expected = Quaternion(expected[3], expected[0], expected[1], expected[2])
     Offset = quat.inverse*expected

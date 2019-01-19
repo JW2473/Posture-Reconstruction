@@ -9,7 +9,7 @@ function swap()
 swap "/etc/dnsmasq.conf"  "/etc/dnsmasq.conf.save"
 swap "/etc/default/hostapd"  "/etc/default/hostapd.save"
 swap "/etc/dhcpcd.conf"  "/etc/dhcpcd.conf.save"
-swap "/etc/network/interfaces" "/etc/network/interfaces.save"
+#swap "/etc/network/interfaces" "/etc/network/interfaces.save"
 
 variableA=$(systemctl is-active hostapd)
 if [ $variableA = "active" ]
