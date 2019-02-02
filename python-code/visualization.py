@@ -22,9 +22,10 @@ t = np.linspace(0, 60, 240)
 #interpolatedData = processRow(['test.csv', 'test2.csv', 'test3.csv', 'test4.csv'], t)
 
 from processStream import processRow
-interpolatedData = processRow(['../pipe1', '../pipe1','../pipe1','../pipe1'], t)
+interpolatedData = processRow(['../pipe3', '../pipe4'], t)
 
 def updateRealtimeVis(quat, idStr, ax):
+    '''
     if idStr == 'head':
         headPos = quat.rotate([0, 0, 1])
         ind = np.linspace(0,1,11)
@@ -50,9 +51,11 @@ def updateRealtimeVis(quat, idStr, ax):
             z = [0+elbowPos[2]*i for i in ind] + [0+elbowPos[2]+wristRelativePos[2]*i for i in ind]
             ax.plot(x, y, z)
             return elbowRelativeQuat
-        
+    '''    
     if idStr == 'leftArm':
-        #print(euler)
+        euler = transformations.euler_from_quaternion([quat[1], quat[2], quat[3], quat[0]])
+        print('left_arm_quat: ')
+        print(quat)
         ans =  ANGLE_MAP_L[str(rad2Bucket(euler[0]))][str(rad2Bucket(euler[2]))][str(rad2Bucket(euler[1]))]
         #print(ans)
         if ans['shoulderX'] is not None:
@@ -80,7 +83,7 @@ def deg2rad(deg):
   return deg * 3.1415926 / 180
 
 for i in t:
-    _, quatLeft, _, _, _, _ = next(interpolatedData)
+    quatLeft, _ = next(interpolatedData)
     #print(quatLeft[0], quatLeft[1], quatLeft[2], quatLeft[3])
     ax.clear()
     ind = np.linspace(0, 1, 11)
@@ -97,5 +100,5 @@ for i in t:
     #updateRealtimeVis(quatRight, 'rightArm', ax)
     plt.axis('equal')
     plt.show()
-    plt.pause(2)
+    #plt.pause(0.1)
 

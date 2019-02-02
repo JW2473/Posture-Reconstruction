@@ -18,24 +18,25 @@ def display(quat):
 
 def processRow(data_dirs, t):
     torsoInterpo = createInterpolator(data_dirs[0])
-    headInterpo = createInterpolator(data_dirs[1])
-    leftInterpo = createInterpolator(data_dirs[2])
-    rightInterpo = createInterpolator(data_dirs[3])
-
+    #headInterpo = createInterpolator(data_dirs[1])
+    leftInterpo = createInterpolator(data_dirs[1])
+    #rightInterpo = createInterpolator(data_dirs[3])
+    print('file opened')
     torsoQuats = torsoInterpo[3].evaluate(t)
-    headQuats = headInterpo[3].evaluate(t)
+    #headQuats = headInterpo[3].evaluate(t)
     leftQuats = leftInterpo[3].evaluate(t)
-    rightQuats = rightInterpo[3].evaluate(t)
+    #rightQuats = rightInterpo[3].evaluate(t)
     torsoAccs = (torsoInterpo[0].evaluate(t), torsoInterpo[1].evaluate(t), torsoInterpo[2].evaluate(t))
-    headAccs = (headInterpo[0].evaluate(t), headInterpo[1].evaluate(t), headInterpo[2].evaluate(t))
+    #headAccs = (headInterpo[0].evaluate(t), headInterpo[1].evaluate(t), headInterpo[2].evaluate(t))
     leftAccs = (leftInterpo[0].evaluate(t), leftInterpo[1].evaluate(t), leftInterpo[2].evaluate(t))
-    rightAccs = (rightInterpo[0].evaluate(t), rightInterpo[1].evaluate(t), rightInterpo[2].evaluate(t))
+    #rightAccs = (rightInterpo[0].evaluate(t), rightInterpo[1].evaluate(t), rightInterpo[2].evaluate(t))
     
 
     #torsoOffset = Quaternion([-0.01483, 0.659224, 0.747234, 0.082578])
     #headOffset = Quaternion([-0.101687, 0.62569, 0.77248, 0.038392])
     torsoOffset = Quaternion([1, 0, 0, 0])
     headOffset = Quaternion([1, 0, 0, 0])
+    leftOffset = Quaternion([1, 0, 0, 0])
     for i in t:
         torsoQuat = next(torsoQuats)
         #print(torsoQuat[0], torsoQuat[1], torsoQuat[2], torsoQuat[3])
@@ -80,10 +81,10 @@ def processRow(data_dirs, t):
                 leftRelativeQuat = correctedTorsoQuat.inverse*leftQuat
                 #leftRelative = transformations.euler_from_quaternion(leftRelativeQuat)
                 #display(leftQuat)
+                leftRelativeQuat = leftRelativeQuat*leftOffset
                 leftAccRelative = [leftAcc[i] - torsoAcc[i] for i in range(0, 3)]
                 if i < 5:
-                    leftOffset = Calibrate(leftAccRelative)
-                leftAccRelative = leftAccRelative*leftOffset
+                    leftOffset = Calibrate(leftRelativeQuat)
         '''
         rightQuat = next(rightQuats)
         rightQuatValid = rightQuat[0] is not None and not (rightQuat[0] == rightQuat[1] and rightQuat[0] == rightQuat[2] and rightQuat[0] == rightQuat[3])
@@ -97,7 +98,7 @@ def processRow(data_dirs, t):
                 #rightRelative = transformations.euler_from_quaternion(rightRelativeQuat)
                 rightAccRelative = [rightAcc[i] - torsoAcc[i] for i in range(0, 3)]
         '''
-        yield (0, leftRelativeQuat, 0, 0, leftAccRelative, 0)
+        yield leftRelativeQuat, leftAccRelative
 
 
 
@@ -127,7 +128,7 @@ def readData(inds, queues, data_dir):
 
 def createInterpolator(data_dir):
     queues = [queue.Queue() for i in [0, 1, 2, 3]]
-    th = threading.Thread(target=readData, args=([[5], [6], [7], [2, 3, 4]], queues, data_dir))
+    th = threading.Thread(target=readData, args=([[2], [3], [4], [11, 12, 13]], queues, data_dir))
     th.daemon = True
     th.start()
     acc_x_inter = InterpoCubic(queues[0])
