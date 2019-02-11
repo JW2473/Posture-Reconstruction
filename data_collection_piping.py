@@ -50,7 +50,8 @@ while len(channels) < 2:
         if channel not in channels:
             channels.append(channel)
             #ind = IPs.index(addr[0]) 
-            Files[channel] = open(channel+datetime.now()+'.csv', 'w')
+            #Files[channel] = open(channel+'.csv', 'w')
+            Files[channel] = open('pipe'+channel, 'w')
             
 
 timelist = datetime.now().strftime("%H:%M:%S.%f").split(':')
@@ -65,7 +66,7 @@ while True:
     #data[0] = str(int(data[0])*3.1415926/180)
     timelist = datetime.now().strftime("%H:%M:%S.%f").split(':')
     t = str(int(timelist[0])*3600 + int(timelist[1])*60 + float(timelist[2])-t0)
-    s = t + ',' + data.decode() + '\n'
+    s = data.decode() + ',' + t + '\n'
     print(s)
     Files[channel].write(s)
     Files[channel].flush()
