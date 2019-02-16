@@ -15,14 +15,14 @@ ANGLE_MAP_R = json.load(open('rightDict_yzx.json', 'r'))
 plt.ion()
 fig = plt.figure()
 ax = fig.gca(projection='3d')
-t = np.linspace(0, 60, 240)
+t = np.linspace(0, 60, 120)
 
 
 #from processData import processRow
 #interpolatedData = processRow(['test.csv', 'test2.csv', 'test3.csv', 'test4.csv'], t)
 
 from processStream import processRow
-interpolatedData = processRow(['../pipe3', '../pipe4'], t)
+interpolatedData = processRow(['../pipe7', '../pipe8'], t)
 
 def updateRealtimeVis(quat, idStr, ax):
     '''
@@ -54,10 +54,11 @@ def updateRealtimeVis(quat, idStr, ax):
     '''    
     if idStr == 'leftArm':
         euler = transformations.euler_from_quaternion([quat[1], quat[2], quat[3], quat[0]])
-        print('left_arm_quat: ')
-        print(quat)
         ans =  ANGLE_MAP_L[str(rad2Bucket(euler[0]))][str(rad2Bucket(euler[2]))][str(rad2Bucket(euler[1]))]
-        #print(ans)
+        ans = {}
+        ans['shoulderX'] = 0
+        ans['shoulderY'] = 0
+        ans['shoulderZ'] = 0
         if ans['shoulderX'] is not None:
             elbowRelativeEuler = [deg2rad(ans['shoulderX']), deg2rad(ans['shoulderZ']), deg2rad(ans['shoulderY'])]
             elbowRelativeQuat = transformations.quaternion_from_euler(elbowRelativeEuler[0], elbowRelativeEuler[1], elbowRelativeEuler[2])
@@ -100,5 +101,5 @@ for i in t:
     #updateRealtimeVis(quatRight, 'rightArm', ax)
     plt.axis('equal')
     plt.show()
-    #plt.pause(0.1)
+    plt.pause(0.1)
 

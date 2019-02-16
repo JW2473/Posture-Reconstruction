@@ -78,7 +78,7 @@ def processRow(data_dirs, t):
             if torsoQuatValid:
                 leftRelativeQuat = correctedTorsoQuat.inverse*leftQuat
                 #leftRelative = transformations.euler_from_quaternion(leftRelativeQuat)
-                #display(leftQuat)
+                display(leftRelativeQuat)
                 leftAccRelative = [leftAcc[i] - torsoAcc[i] for i in range(0, 3)]
 
         rightQuat = next(rightQuats)

@@ -43,7 +43,6 @@ def processRow(data_dirs, t):
         torsoQuatValid = torsoQuat[0] is not None and not (torsoQuat[0] == torsoQuat[1] and torsoQuat[0] == torsoQuat[2] and torsoQuat[0] == torsoQuat[3])
         if torsoQuatValid:
             correctedTorsoQuat = torsoQuat*torsoOffset
-            #display(correctedTorsoQuat)
             torsoAcc = []
             torsoAcc.append(next(torsoAccs[0]))
             torsoAcc.append(next(torsoAccs[1]))
@@ -80,11 +79,11 @@ def processRow(data_dirs, t):
             if torsoQuatValid:
                 leftRelativeQuat = correctedTorsoQuat.inverse*leftQuat
                 #leftRelative = transformations.euler_from_quaternion(leftRelativeQuat)
-                #display(leftQuat)
-                leftRelativeQuat = leftRelativeQuat*leftOffset
+                display(leftQuat)
                 leftAccRelative = [leftAcc[i] - torsoAcc[i] for i in range(0, 3)]
-                if i < 5:
+                if i < 3:
                     leftOffset = Calibrate(leftRelativeQuat)
+                leftRelativeQuat = leftRelativeQuat*leftOffset
         '''
         rightQuat = next(rightQuats)
         rightQuatValid = rightQuat[0] is not None and not (rightQuat[0] == rightQuat[1] and rightQuat[0] == rightQuat[2] and rightQuat[0] == rightQuat[3])
@@ -117,7 +116,7 @@ def readData(inds, queues, data_dir):
                         result.append(float(linelist[j]))
                     queues[i].put((t, result))
             else:
-                time.sleep(0.05)
+                time.sleep(0.02)
         except OSError as err:
             if err.errno == 11:
                 continue

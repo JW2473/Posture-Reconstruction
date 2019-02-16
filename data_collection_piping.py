@@ -42,18 +42,7 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind(("192.168.4.1", 8080))
 #print(IPs)
 
-channels = []
-while len(channels) < 2:
-    data, addr = sock.recvfrom(1024);
-    if True:
-        channel = data.decode().split(',')[0]
-        if channel not in channels:
-            channels.append(channel)
-            #ind = IPs.index(addr[0]) 
-            #Files[channel] = open(channel+'.csv', 'w')
-            Files[channel] = open('pipe'+channel, 'w')
             
-
 timelist = datetime.now().strftime("%H:%M:%S.%f").split(':')
 t0 = int(timelist[0])*3600 + int(timelist[1])*60 + float(timelist[2])
 while True:
@@ -68,5 +57,9 @@ while True:
     t = str(int(timelist[0])*3600 + int(timelist[1])*60 + float(timelist[2])-t0)
     s = data.decode() + ',' + t + '\n'
     print(s)
-    Files[channel].write(s)
-    Files[channel].flush()
+    if channel in Files:
+        Files[channel].write(s)
+        Files[channel].flush()
+    else:
+        Files[channel] = open('pipe'+channel, 'w')
+        
