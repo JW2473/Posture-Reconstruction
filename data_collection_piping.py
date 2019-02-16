@@ -11,20 +11,8 @@ sock1 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock2 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock2.bind(("192.168.4.4", 8080))
 '''
-IPs = []
-files = []
 pipe = subprocess.Popen("arp -a|grep esp", shell=True, stdout=subprocess.PIPE)
 text = pipe.stdout.read().decode("utf-8")
-
-
-class Receiver(threading.Thread):
-    def run(self, UDP_IP, UDP_PORT, f):
-        while True:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            sock.bind((UDP_IP, UDP_PORT))
-            data, addr = sock.recvfrom(1024)
-            f.write(data)
-    
 '''
 lines = text.split('\n') ;
 for line in lines:
@@ -35,9 +23,7 @@ for line in lines:
         if True:
             IPs.append(ip)
 '''
-num_sensors = 4
 Files = {}
-
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind(("192.168.4.1", 8080))
 #print(IPs)
@@ -61,5 +47,5 @@ while True:
         Files[channel].write(s)
         Files[channel].flush()
     else:
+        subprocess.call("mkfifo pipe"+channel, shell=True)
         Files[channel] = open('pipe'+channel, 'w')
-        

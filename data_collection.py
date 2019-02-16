@@ -60,4 +60,4 @@ while True:
         Files[channel].write(s)
         Files[channel].flush()
     else:
-        Files[channel] = open(channel+datetime.now()+'.csv', 'w')
+        Files[channel] = open(channel + str(datetime.datetime.now()).replace(' ','_').replace('.','_').replace(':','_') + '.csv', 'w')

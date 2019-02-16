@@ -22,7 +22,7 @@ t = np.linspace(0, 60, 120)
 #interpolatedData = processRow(['test.csv', 'test2.csv', 'test3.csv', 'test4.csv'], t)
 
 from processStream import processRow
-interpolatedData = processRow(['../pipe7', '../pipe8'], t)
+interpolatedData = processRow(['../pipe12', '../pipe13'], t)
 
 def updateRealtimeVis(quat, idStr, ax):
     '''
@@ -86,8 +86,9 @@ def deg2rad(deg):
 for i in t:
     quatLeft, _ = next(interpolatedData)
     #print(quatLeft[0], quatLeft[1], quatLeft[2], quatLeft[3])
+    
     ax.clear()
-    ind = np.linspace(0, 1, 11)
+    ind = np.linspace(0, 1, 10)
     x = [0 for i in ind]
     y = [-1+2*i for i in ind]
     z = [0 for i in ind]
@@ -101,5 +102,4 @@ for i in t:
     #updateRealtimeVis(quatRight, 'rightArm', ax)
     plt.axis('equal')
     plt.show()
-    plt.pause(0.1)
-
+    plt.clf()

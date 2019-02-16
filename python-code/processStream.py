@@ -110,6 +110,7 @@ def readData(inds, queues, data_dir):
                 line = line.split('\n')[-2]
                 linelist = line.split(',')
                 t = float(linelist[-1])
+                print(t)
                 for i, ind in enumerate(inds):
                     result = []
                     for j in ind:
@@ -159,6 +160,7 @@ class InterpoQuat:
             q1 = Quaternion(q1[3], q1[0], q1[1], q1[2])
 
             w = (t[i] - t0)/(t1 - t0)
+            print('t[i],t0,t1:',t[i],t0,t1)
             yield Quaternion.slerp(q0, q1, w)
 
 class InterpoCubic:
